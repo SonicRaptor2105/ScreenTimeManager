@@ -9,39 +9,44 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.screentimemanager.ui.theme.ScreenTimeManagerTheme
 
-class MainActivity : ComponentActivity() {
-    data class AppTime (
-        val app : String,
-        val usage : Long
-    )
+data class AppTime (
+    val app : String,
+    val usage : Long
+)
+class MainActivity : AppCompatActivity() {
+    private lateinit var recyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ScreenTimeManagerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Text(text = "abc", modifier = Modifier.padding(innerPadding))
-                }
-            }
-        }
+        setContentView(R.layout.layout)
+        recyclerView = findViewById(R.id.recyclerView)
 
         if (hasPermissions()) {
-
+            setAdapter()
         }
         else {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         }
 
+    }
+
+    private fun setAdapter() {
+        val adapter = recycleAdapter(screenTime())
+        val layoutManager : RecyclerView.LayoutManager = LinearLayoutManager(getApplicationContext())
+        recyclerView.setLayoutManager(layoutManager)
+        recyclerView.setItemAnimator(DefaultItemAnimator())
+        recyclerView.setAdapter(adapter)
     }
     private fun hasPermissions(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
@@ -57,7 +62,7 @@ class MainActivity : ComponentActivity() {
         val endTime = System.currentTimeMillis()
         val startTime = endTime - 86400000
 
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime) ?: emptyList()
 
         val sortedStats = stats.sortedByDescending { it.totalTimeInForeground }
 
