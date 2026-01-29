@@ -19,10 +19,12 @@ public class recycleAdapter extends RecyclerView.Adapter<recycleAdapter.MyViewHo
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView application;
+        private TextView usageTime;
 
         public MyViewHolder(final View view){
             super(view);
             application = view.findViewById(R.id.Application);
+            usageTime = view.findViewById(R.id.ScreenTime);
         }
     }
 
@@ -36,7 +38,10 @@ public class recycleAdapter extends RecyclerView.Adapter<recycleAdapter.MyViewHo
     @Override
     public void onBindViewHolder(@NonNull recycleAdapter.MyViewHolder holder, int position) {
         String name = apps.get(position).getApp();
+        long usage = apps.get(position).getUsage();
+
         holder.application.setText(name);
+        holder.usageTime.setText(String.format("%d mins", usage));
     }
 
     @Override

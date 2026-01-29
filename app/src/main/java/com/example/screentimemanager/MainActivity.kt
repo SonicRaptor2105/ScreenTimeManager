@@ -71,7 +71,10 @@ class MainActivity : AppCompatActivity() {
 
         sortedStats.forEach { usageStat ->
             val timeInMinutes = usageStat.totalTimeInForeground / 60000
-            val appName = usageStat.packageName
+            var appName = usageStat.packageName
+            if ("com." in appName) {
+                appName = appName.replace("com.", "")
+            }
             if (appName != null && timeInMinutes > 0) {
                 apps.add(AppTime(appName, timeInMinutes))
             }
