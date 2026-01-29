@@ -1,24 +1,19 @@
 package com.example.screentimemanager
 
 import android.app.AppOpsManager
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.screentimemanager.ui.theme.ScreenTimeManagerTheme
+import java.util.Calendar
 
 data class AppTime (
     val app : String,
@@ -31,45 +26,54 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout)
         recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+        recyclerView.itemAnimator = DefaultItemAnimator()
+    }
 
+    override fun onResume() {
+        super.onResume()
         if (hasPermissions()) {
             setAdapter()
-        }
-        else {
+        } else {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
         }
-
     }
 
     private fun setAdapter() {
         val adapter = recycleAdapter(screenTime())
-        val layoutManager : RecyclerView.LayoutManager = LinearLayoutManager(getApplicationContext())
-        recyclerView.setLayoutManager(layoutManager)
-        recyclerView.setItemAnimator(DefaultItemAnimator())
-        recyclerView.setAdapter(adapter)
+        recyclerView.adapter = adapter
     }
     private fun hasPermissions(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName)
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            packageName
+        )
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
     private fun screenTime(): ArrayList<AppTime> {
         val apps = ArrayList<AppTime>()
-
         val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        val startTime = cal.timeInMillis
         val endTime = System.currentTimeMillis()
-        val startTime = endTime - 86400000
 
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime) ?: emptyList()
+        val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime) ?: emptyList()
 
-        val sortedStats = stats.sortedByDescending { it.totalTimeInForeground }
+        val sortedStats = usageStats.toList().sortedByDescending {it.totalTimeInForeground }
 
         sortedStats.forEach { usageStat ->
             val timeInMinutes = usageStat.totalTimeInForeground / 60000
-            if (timeInMinutes > 0) {
-                apps.add(AppTime(usageStat.packageName, timeInMinutes))
+            val appName = usageStat.packageName
+            if (appName != null && timeInMinutes > 0) {
+                apps.add(AppTime(appName, timeInMinutes))
             }
         }
         return apps
