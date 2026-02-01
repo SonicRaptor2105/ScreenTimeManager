@@ -37,7 +37,7 @@ public class recycleAdapter extends RecyclerView.Adapter<recycleAdapter.MyViewHo
 
     @Override
     public void onBindViewHolder(@NonNull recycleAdapter.MyViewHolder holder, int position) {
-        String name = apps.get(position).getApp();
+        String name = apps.get(position).getAppName();
         long usage = apps.get(position).getUsage();
 
         holder.application.setText(name);

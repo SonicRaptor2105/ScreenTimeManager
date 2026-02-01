@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.Calendar
 
 data class AppTime (
-    val app : String,
+    val packageName: String,
+    val appName : String,
     val usage : Long
 )
 class MainActivity : AppCompatActivity() {
@@ -71,12 +72,16 @@ class MainActivity : AppCompatActivity() {
 
         sortedStats.forEach { usageStat ->
             val timeInMinutes = usageStat.totalTimeInForeground / 60000
-            var appName = usageStat.packageName
-            if ("com." in appName) {
-                appName = appName.replace("com.", "")
-            }
-            if (appName != null && timeInMinutes > 0) {
-                apps.add(AppTime(appName, timeInMinutes))
+            if (timeInMinutes > 0) {
+                try {
+                    val pm = packageManager
+                    val appInfo = pm.getApplicationInfo(usageStat.packageName, 0)
+                    val appName = pm.getApplicationLabel(appInfo).toString()
+                    Log.d("app", usageStat.packageName)
+                    apps.add(AppTime(usageStat.packageName, appName, timeInMinutes))
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.d("FailedPackageName", e.toString())
+                }
             }
         }
         return apps
