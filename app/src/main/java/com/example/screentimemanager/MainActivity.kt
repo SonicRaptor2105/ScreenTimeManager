@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setAdapter() {
-        val adapter = recycleAdapter(screenTime())
+        val adapter = recycleAdapter(screenTime(), this)
         recyclerView.adapter = adapter
     }
     private fun hasUsageAccessPermissions(): Boolean {
