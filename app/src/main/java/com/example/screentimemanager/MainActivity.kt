@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasPermissions()) {
+        if (hasUsageAccessPermissions()) {
             setAdapter()
         } else {
             startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         val adapter = recycleAdapter(screenTime())
         recyclerView.adapter = adapter
     }
-    private fun hasPermissions(): Boolean {
+    private fun hasUsageAccessPermissions(): Boolean {
         val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOps.checkOpNoThrow(
             AppOpsManager.OPSTR_GET_USAGE_STATS,
