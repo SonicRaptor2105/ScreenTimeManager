@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class recycleAdapter extends RecyclerView.Adapter<recycleAdapter.MyViewHolder> {
     private ArrayList<AppTime> apps;
@@ -68,6 +69,13 @@ public class recycleAdapter extends RecyclerView.Adapter<recycleAdapter.MyViewHo
         AppTime app = apps.get(position);
         holder.application.setText(app.getAppName());
         holder.usageTime.setText(String.format("%d mins", app.getUsage()));
+        for (String s : tracked) {
+            if (Objects.equals(s, app.getPackageName())) {
+                holder.lockSwitch.setChecked(true);
+                break;
+            }
+        }
+
 
         holder.lockSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
