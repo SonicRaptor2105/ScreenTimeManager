@@ -10,10 +10,13 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Calendar
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 
 data class AppTime (
     val packageName: String,
@@ -29,6 +32,9 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
         recyclerView.itemAnimator = DefaultItemAnimator()
+
+        val serviceIntent = Intent(this, appLocker::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
     }
 
     override fun onResume() {
