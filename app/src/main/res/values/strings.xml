@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ScreenTimeManager</string>
+    <string name="accessibility_service_description">Monitor foreground applications for app usage tracking and parental controls</string>
 </resources>
